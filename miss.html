@@ -1,0 +1,462 @@
+
+  
+      <!DOCTYPE html>
+      <html lang="zh-CN">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>连续祝福弹窗</title>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          <style>
+              * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+                  font-family: 'Microsoft YaHei', sans-serif;
+              }
+              
+              body {
+                  background: linear-gradient(135deg, #f9c5d1 0%, #c2e9fb 100%);
+                  min-height: 100vh;
+                  padding: 20px;
+                  color: #333;
+                  overflow: hidden;
+                  position: relative;
+              }
+              
+              .container {
+                  max-width: 800px;
+                  margin: 0 auto;
+                  text-align: center;
+                  position: relative;
+                  z-index: 1;
+              }
+              
+              .header {
+                  margin-bottom: 30px;
+                  padding: 20px;
+                  background: rgba(255, 255, 255, 0.8);
+                  border-radius: 15px;
+                  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+              }
+              
+              h1 {
+                  color: #ff6b6b;
+                  margin-bottom: 15px;
+                  font-size: 2.5rem;
+                  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+              }
+              
+              .subtitle {
+                  font-size: 1.2rem;
+                  color: #666;
+                  margin-bottom: 10px;
+              }
+              
+              .instructions {
+                  background: rgba(255, 255, 255, 0.8);
+                  border-radius: 15px;
+                  padding: 25px;
+                  margin-top: 30px;
+                  text-align: left;
+                  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+              }
+              
+              .instructions h3 {
+                  color: #ff6b6b;
+                  margin-bottom: 15px;
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+              }
+              
+              .instructions ol {
+                  padding-left: 20px;
+              }
+              
+              .instructions li {
+                  margin-bottom: 10px;
+                  line-height: 1.5;
+              }
+              
+              /* 弹窗样式 */
+              .blessing-modal {
+                  position: fixed;
+                  background: white;
+                  border-radius: 15px;
+                  padding: 20px;
+                  width: 280px;
+                  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                  z-index: 1000;
+                  animation: fadeInUp 0.8s ease, float 3s ease-in-out infinite;
+                  border-left: 5px solid #ff6b6b;
+              }
+              
+              .blessing-content {
+                  text-align: center;
+              }
+              
+              .blessing-text {
+                  font-size: 1.2rem;
+                  color: #ff6b6b;
+                  margin: 10px 0;
+                  line-height: 1.4;
+                  font-weight: 500;
+              }
+              
+              .blessing-hearts {
+                  font-size: 1.5rem;
+                  color: #ff6b6b;
+                  margin: 10px 0;
+              }
+              
+              .close-btn {
+                  position: absolute;
+                  top: 10px;
+                  right: 15px;
+                  font-size: 20px;
+                  cursor: pointer;
+                  color: #aaa;
+                  transition: color 0.3s;
+              }
+              
+              .close-btn:hover {
+                  color: #ff6b6b;
+              }
+              
+              .floating-hearts {
+                  position: fixed;
+                  top: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 100%;
+                  pointer-events: none;
+                  z-index: 0;
+              }
+              
+              .heart {
+                  position: absolute;
+                  font-size: 20px;
+                  color: #ff6b6b;
+                  opacity: 0;
+                  animation: floatUp 5s linear infinite;
+              }
+              
+              .control-panel {
+                  background: rgba(255, 255, 255, 0.8);
+                  border-radius: 15px;
+                  padding: 20px;
+                  margin-top: 20px;
+                  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+              }
+              
+              .btn {
+                  background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+                  color: white;
+                  border: none;
+                  padding: 12px 25px;
+                  border-radius: 50px;
+                  font-size: 1rem;
+                  cursor: pointer;
+                  transition: all 0.3s ease;
+                  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+                  font-weight: 600;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 10px;
+                  margin: 0 10px;
+              }
+              
+              .btn:hover {
+                  transform: translateY(-3px);
+                  box-shadow: 0 7px 20px rgba(255, 107, 107, 0.4);
+              }
+              
+              .btn-secondary {
+                  background: linear-gradient(45deg, #a1c4fd, #c2e9fb);
+                  box-shadow: 0 4px 15px rgba(161, 196, 253, 0.3);
+              }
+              
+              .btn-secondary:hover {
+                  box-shadow: 0 7px 20px rgba(161, 196, 253, 0.4);
+              }
+              
+              @keyframes fadeInUp {
+                  from { 
+                      opacity: 0;
+                      transform: translateY(20px) scale(0.9);
+                  }
+                  to { 
+                      opacity: 1;
+                      transform: translateY(0) scale(1);
+                  }
+              }
+              
+              @keyframes float {
+                  0% { transform: translateY(0); }
+                  50% { transform: translateY(-10px); }
+                  100% { transform: translateY(0); }
+              }
+              
+              @keyframes floatUp {
+                  0% {
+                      transform: translateY(100vh) rotate(0deg);
+                      opacity: 0;
+                  }
+                  10% {
+                      opacity: 1;
+                  }
+                  90% {
+                      opacity: 0.8;
+                  }
+                  100% {
+                      transform: translateY(-100px) rotate(360deg);
+                      opacity: 0;
+                  }
+              }
+              
+              @media (max-width: 768px) {
+                  h1 {
+                      font-size: 2rem;
+                  }
+                  
+                  .blessing-modal {
+                      width: 250px;
+                  }
+                  
+                  .blessing-text {
+                      font-size: 1.1rem;
+                  }
+              }
+              
+              @media (max-width: 480px) {
+                  h1 {
+                      font-size: 1.8rem;
+                  }
+                  
+                  .blessing-modal {
+                      width: 220px;
+                      padding: 15px;
+                  }
+                  
+                  .blessing-text {
+                      font-size: 1rem;
+                  }
+                  
+                  .btn {
+                      padding: 10px 20px;
+                      font-size: 0.9rem;
+                      margin: 5px;
+                  }
+              }
+          </style>
+      </head>
+      <body>
+          <!-- 漂浮的心形背景 -->
+          <div class="floating-hearts" id="floatingHearts"></div>
+          
+          <div class="container">
+              <div class="header">
+                  <h1>亲爱的金融宝宝 ✨</h1>
+                  <p class="subtitle">这是送给你一个人的单独祝福哦</p>
+              </div>
+              
+              <div class="control-panel">
+                  <button class="btn" id="startBlessings">
+                      <i class="fas fa-play"></i> 开始祝福
+                  </button>
+                  <button class="btn btn-secondary" id="stopBlessings">
+                      <i class="fas fa-pause"></i> 暂停祝福
+                  </button>
+                  <button class="btn btn-secondary" id="clearBlessings">
+                      <i class="fas fa-trash"></i> 清除所有
+                  </button>
+              </div>
+              
+          </div>
+      
+          <script>
+              // 祝福语库
+              const blessings = [
+                  "我想你了",
+                  "记得好好护肤",
+                  "天冷了，多穿衣服",
+                  "我偷懒也好",
+                  "我想你了",
+                  "保持好心情",
+                  "期待下一次见面",
+                  "学会爱自己，才能更好地爱别人",
+                  "愿你每天都有好心情",
+                  "一切都会越来越好",
+                  "你是最棒的",
+                  "加油，你可以的",
+                  "记得按时吃饭",
+                  "早点休息，别熬夜",
+                  "愿你被世界温柔以待"
+              ];
+              
+              // 全局变量
+              let blessingInterval;
+              let isBlessingActive = false;
+              let modalCount = 0;
+              const maxModals = 40; // 最多同时显示的弹窗数量
+              
+              // 获取DOM元素
+              const startBtn = document.getElementById('startBlessings');
+              const stopBtn = document.getElementById('stopBlessings');
+              const clearBtn = document.getElementById('clearBlessings');
+              const floatingHearts = document.getElementById('floatingHearts');
+              
+              // 创建祝福弹窗
+              function createBlessingModal() {
+                  if (modalCount >= maxModals) {
+                      // 如果弹窗数量达到上限，先移除最早的一个
+                      const firstModal = document.querySelector('.blessing-modal');
+                      if (firstModal) {
+                          firstModal.remove();
+                          modalCount--;
+                      }
+                  }
+                  
+                  // 随机选择一条祝福语
+                  const randomIndex = Math.floor(Math.random() * blessings.length);
+                  const blessingText = blessings[randomIndex];
+                  
+                  // 创建弹窗元素
+                  const modal = document.createElement('div');
+                  modal.className = 'blessing-modal';
+                  
+                  // 随机位置
+                  const left = Math.random() * (window.innerWidth - 300);
+                  const top = Math.random() * (window.innerHeight - 200);
+                  
+                  modal.style.left = `${left}px`;
+                  modal.style.top = `${top}px`;
+                  
+                  // 弹窗内容
+                  modal.innerHTML = `
+                      <span class="close-btn">&times;</span>
+                      <div class="blessing-content">
+                          <div class="blessing-hearts">
+                              <i class="fas fa-heart"></i> <i class="fas fa-heart"></i> <i class="fas fa-heart"></i>
+                          </div>
+                          <p class="blessing-text">${blessingText}</p>
+                          <div class="blessing-hearts">
+                              <i class="fas fa-heart"></i> <i class="fas fa-heart"></i> <i class="fas fa-heart"></i>
+                          </div>
+                      </div>
+                  `;
+                  
+                  // 添加到页面
+                  document.body.appendChild(modal);
+                  modalCount++;
+                  
+                  // 关闭按钮事件
+                  const closeBtn = modal.querySelector('.close-btn');
+                  closeBtn.addEventListener('click', function() {
+                      modal.remove();
+                      modalCount--;
+                  });
+                  
+                  // 使弹窗可拖动
+                  makeDraggable(modal);
+              }
+              
+              // 使元素可拖动
+              function makeDraggable(element) {
+                  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+                  
+                  element.onmousedown = dragMouseDown;
+                  
+                  function dragMouseDown(e) {
+                      e = e || window.event;
+                      e.preventDefault();
+                      // 获取鼠标初始位置
+                      pos3 = e.clientX;
+                      pos4 = e.clientY;
+                      document.onmouseup = closeDragElement;
+                      document.onmousemove = elementDrag;
+                  }
+                  
+                  function elementDrag(e) {
+                      e = e || window.event;
+                      e.preventDefault();
+                      // 计算新位置
+                      pos1 = pos3 - e.clientX;
+                      pos2 = pos4 - e.clientY;
+                      pos3 = e.clientX;
+                      pos4 = e.clientY;
+                      // 设置元素新位置
+                      element.style.top = (element.offsetTop - pos2) + "px";
+                      element.style.left = (element.offsetLeft - pos1) + "px";
+                  }
+                  
+                  function closeDragElement() {
+                      document.onmouseup = null;
+                      document.onmousemove = null;
+                  }
+              }
+              
+              // 开始祝福
+              function startBlessings() {
+                  if (isBlessingActive) return;
+                  
+                  isBlessingActive = true;
+                  // 先创建一个弹窗
+                  createBlessingModal();
+                  // 然后每隔3秒创建一个新弹窗
+                  blessingInterval = setInterval(createBlessingModal, 500);
+              }
+              
+              // 停止祝福
+              function stopBlessings() {
+                  isBlessingActive = false;
+                  clearInterval(blessingInterval);
+              }
+              
+              // 清除所有弹窗
+              function clearAllBlessings() {
+                  const modals = document.querySelectorAll('.blessing-modal');
+                  modals.forEach(modal => modal.remove());
+                  modalCount = 0;
+              }
+              
+              // 事件监听
+              startBtn.addEventListener('click', startBlessings);
+              stopBtn.addEventListener('click', stopBlessings);
+              clearBtn.addEventListener('click', clearAllBlessings);
+              
+              // 创建漂浮的心形
+              function createFloatingHearts() {
+                  const heartCount = 15;
+                  
+                  for (let i = 0; i < heartCount; i++) {
+                      const heart = document.createElement('div');
+                      heart.className = 'heart';
+                      heart.innerHTML = '<i class="fas fa-heart"></i>';
+                      
+                      // 随机位置和动画延迟
+                      const left = Math.random() * 100;
+                      const delay = Math.random() * 5;
+                      const duration = 5 + Math.random() * 5;
+                      
+                      heart.style.left = `${left}vw`;
+                      heart.style.animationDelay = `${delay}s`;
+                      heart.style.animationDuration = `${duration}s`;
+                      
+                      floatingHearts.appendChild(heart);
+                  }
+              }
+              
+              // 初始化漂浮心形
+              createFloatingHearts();
+              
+              // 页面加载后自动开始祝福（延迟3秒）
+              window.addEventListener('load', function() {
+                  setTimeout(startBlessings, 3000);
+              });
+          </script>
+      </body>
+      </html>
+   
